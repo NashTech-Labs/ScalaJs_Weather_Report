@@ -1,0 +1,129 @@
+
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript"
+	src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script type="text/javascript"
+	src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+	function showDetail() {
+
+		var name = document.getElementById("name").value
+
+		var Httpreq = new XMLHttpRequest(); // a new request
+		Httpreq.open("GET", "http://api.openweathermap.org/data/2.5/weather?q="
+				+ name, false);
+		Httpreq.send(null);
+		var result = JSON.parse(Httpreq.responseText)
+		if (result.cod == '404') {
+			alert('Please Enter A Valid City Name.')
+		} else {
+			document.getElementById('tempDetail').style.display = 'block'
+			document.getElementById('cityName').innerHTML = result.name + ','
+					+ result.sys.country
+			document.getElementById('temp').innerHTML = '<img src="http://openweathermap.org/img/w/'+result.weather[0].icon+'.png" >'
+					+ '   ' + parseInt(result.main.temp - 273.15)
+			document.getElementById('weather').innerHTML = result.weather[0].main
+			document.getElementById('pressure').innerHTML = result.main.pressure
+					+ ' hpa'
+			document.getElementById('humidity').innerHTML = result.main.humidity
+					+ ' %'
+			document.getElementById('sunrise').innerHTML = msToTime(result.sys.sunrise)
+			document.getElementById('sunset').innerHTML = msToTime(result.sys.sunset)
+			document.getElementById('geocoords').innerHTML = '['
+					+ result.coord.lon + ', ' + result.coord.lat + ']'
+			showMap()
+
+		}
+
+	}
+	function msToTime(unix_timestamp) {
+		var date = new Date(unix_timestamp * 1000);
+		var hrs = date.getHours();
+		var mins = date.getMinutes();
+		var secs = date.getSeconds();
+
+		return hrs + ':' + mins + ':' + secs
+	}
+	function showMap() {
+		// Define the address we want to map.
+		var address = document.getElementById("name").value
+
+		// Create a new Geocoder
+		var geocoder = new google.maps.Geocoder();
+
+		// Locate the address using the Geocoder.
+		geocoder
+				.geocode(
+						{
+							"address" : address
+						},
+						function(results, status) {
+
+							// If the Geocoding was successful
+							if (status == google.maps.GeocoderStatus.OK) {
+
+								// Create a Google Map at the latitude/longitude returned by the Geocoder.
+								var myOptions = {
+									zoom : 5,
+									center : results[0].geometry.location,
+									mapTypeId : google.maps.MapTypeId.ROADMAP
+								};
+								var map = new google.maps.Map(document
+										.getElementById("map"), myOptions);
+
+								// Add a marker at the address.
+								var marker = new google.maps.Marker({
+									map : map,
+									position : results[0].geometry.location
+								});
+
+							} else {
+								try {
+									console
+											.error("Geocode was not successful for the following reason: "
+													+ status);
+								} catch (e) {
+								}
+							}
+						});
+	}
+</script>
+</head>
+<body>
+	<input name="name" id="name" size="15" type="text" />
+
+	<input name="submit" id="submit" value="Submit" size="15" type="button"
+		onclick="showDetail()" />
+
+	<div id="tempDetail" style="display: none">
+		<div id="cityName"></div>
+		<br /> <br />
+		<div id="temp"></div>
+		<br /> <br />
+		<div id="weather"></div>
+		<br /> <br />
+
+		<table style="width: 300px">
+			<tr>
+				<td>Pressure</td>
+				<td>Humidity</td>
+				<td>Sunrise</td>
+				<td>Sunset</td>
+				<td>Geo coords</td>
+			</tr>
+			<tr>
+				<td id="pressure"></td>
+				<td id="humidity"></td>
+				<td id="sunrise"></td>
+				<td id="sunset"></td>
+				<td id="geocoords"></td>
+			</tr>
+		</table>
+		<!-- Placeholder for the Google Map -->
+		<div id="map" style="height: 512px; width: 400px;"></div>
+
+	</div>
+</body>
+</html>

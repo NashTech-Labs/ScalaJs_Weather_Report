@@ -1,23 +1,24 @@
-ScalaJs_Weather_Report
+Knoldus ScalaJs_Weather_Report
 ======================
 
 Weather Information System- Get the mood of your city on one click  This is simple project using Scala.js.
+
+![weather](images/weather.png)
 
 
 *************************************************************************************************************
 ###Getting Started with Code  : 
 
+## IDE integration
 
-1.  Import into Eclipse by 
+`$ sbt eclipse`
 
+## Run the application
 
-    >sbt eclipse
-1.  Start application by 
-
-
-    >sbt 
+To run this application, we need to generate JavaScript file out of our compiled code. There are two ways to generate JavaScript: ` fastOptJS` or ` fullOptJS`
+```shell
+$ sbt
+> fullOptJS
+```
     
-    
-    >fastOptJS
-
 

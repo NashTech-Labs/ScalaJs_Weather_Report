@@ -17,14 +17,12 @@ object Weather extends js.JSApp {
 
   @JSExport
   def showDetail() {
-
     val name = g.document.getElementById("name").value
     val xmlHttpRequest = new dom.XMLHttpRequest
 
-    xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name, false)
+    xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name+"&appid=44db6a862fba0b067b1930da0d769e98", false)
     xmlHttpRequest.send(null);
     val result = JSON.parse(xmlHttpRequest.responseText)
-
     if (result.cod.toString() == "404") {
       g.alert("Please Enter A Valid City Name.")
     } else {

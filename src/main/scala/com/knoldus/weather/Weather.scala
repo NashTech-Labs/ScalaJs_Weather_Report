@@ -1,6 +1,6 @@
 package com.knoldus.weather
 
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.{ScalaJSDefined, JSExport}
 import scala.scalajs.js
 import js.Dynamic.{global => g, newInstance => jsnew, literal => lit}
 import org.scalajs.dom
@@ -14,21 +14,29 @@ trait DataGenerator {
     val xmlHttpRequest = new XMLHttpRequest
     xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=44db6a862fba0b067b1930da0d769e98", false)
     xmlHttpRequest.send(null);
-    println("xmlHttpRequest.responseText.........",xmlHttpRequest.responseText)
     JSON.parse(xmlHttpRequest.responseText)
+  }
+
+  def initialize(lat: Double, long: Double) = {
+    val map_canvas = document.getElementById("map_canvas")
+    val map_options = lit(center = (jsnew(g.google.maps.LatLng)) (lat, long), zoom = 3, mapTypeId = g.google.maps.MapTypeId.ROADMAP)
+    val gogleMap = (jsnew(g.google.maps.Map)) (map_canvas, map_options)
+    val marker = (jsnew(g.google.maps.Marker)) (lit(map = gogleMap, position = (jsnew(g.google.maps.LatLng)(lat, long))))
+  }
+
+  def msToTime(unix_timestamp: Long): String = {
+    val date = new Date(unix_timestamp * 1000);
+    val hrs = date.getHours();
+    val mins = date.getMinutes();
+    val secs = date.getSeconds();
+    hrs + ":" + mins + ":" + secs
   }
 }
 
-object Weather extends js.JSApp with DataGenerator{
-
-  def main(): Unit = {
-    jQuery(addUIElement _)
-  }
-
+class WeatherReport extends DataGenerator {
   def addUIElement() = {
     jQuery("body").append(
-      """<div class="col-md-12"
-     style="border-bottom: 1px solid #eee; background: #3D4048">
+      """<div class="col-md-12"      style="border-bottom: 1px solid #eee; background: #3D4048">
     <h1 style="margin-bottom: 5px; color: #DCD0C0; text-align: center;">
         <img src="./images/image.png" height="60px" width="60px"> <span
             style="margin-left: 20px; text-transform: uppercase; text-shadow: 2px 2px 4px #000;">Weather
@@ -141,19 +149,11 @@ object Weather extends js.JSApp with DataGenerator{
   }
 
 
-  def initialize(lat: Double, long: Double) = {
-    val map_canvas = document.getElementById("map_canvas")
-    val map_options = lit(center = (jsnew(g.google.maps.LatLng)) (lat, long), zoom = 3, mapTypeId = g.google.maps.MapTypeId.ROADMAP)
-    val gogleMap = (jsnew(g.google.maps.Map)) (map_canvas, map_options)
-    val marker = (jsnew(g.google.maps.Marker)) (lit(map = gogleMap, position = (jsnew(g.google.maps.LatLng)(lat, long))))
-  }
+}
 
-  def msToTime(unix_timestamp: Long): String = {
-    val date = new Date(unix_timestamp * 1000);
-    val hrs = date.getHours();
-    val mins = date.getMinutes();
-    val secs = date.getSeconds();
-    hrs + ":" + mins + ":" + secs
-  }
+object Weather extends WeatherReport with js.JSApp {
 
+  def main(): Unit = {
+    jQuery(addUIElement _)
+  }
 }

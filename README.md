@@ -3,7 +3,7 @@ Knoldus ScalaJs_Weather_Report
 
 Weather Information System- Get the mood of your city on one click  This is simple project using Scala.js.
 
-![weather](images/weather.png)
+![weather](src/main/resources/images/weather.png)
 
 
 *************************************************************************************************************

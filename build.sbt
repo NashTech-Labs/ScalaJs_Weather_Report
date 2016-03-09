@@ -1,4 +1,8 @@
+import com.lihaoyi.workbench.Plugin._
+
 enablePlugins(ScalaJSPlugin)
+
+workbenchSettings
 
 name := "Knoldus-Scala.js"
 
@@ -13,8 +17,11 @@ resolvers ++= Seq(
 
 libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
 libraryDependencies += "be.doeraene" %%% "scalajs-jquery" % "0.9.0"
+libraryDependencies += "com.github.japgolly.scalacss" %%% "core" % "0.4.0"
+libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.5.4"
+libraryDependencies += "com.github.japgolly.scalacss" %%% "ext-scalatags" % "0.4.0"
 
-skip in packageJSDependencies := false
+
 jsDependencies +=
   "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js"
 
@@ -24,5 +31,6 @@ jsDependencies += RuntimeDOM
 libraryDependencies += "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
 testFrameworks += new TestFramework("utest.runner.Framework")
 
-persistLauncher in Compile := true
-persistLauncher in Test := false
+bootSnippet := "com.knoldus.weather.Weather().main();"
+
+updateBrowsers <<= updateBrowsers.triggeredBy(fastOptJS in Compile)

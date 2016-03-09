@@ -1,15 +1,20 @@
 package com.knoldus.weather
 
-import scala.scalajs.js.annotation.{ScalaJSDefined, JSExport}
-import scala.scalajs.js
-import js.Dynamic.{global => g, newInstance => jsnew, literal => lit}
 import org.scalajs.dom
-import dom.document
-import org.scalajs.dom.XMLHttpRequest
-import scala.scalajs.js.{Array, JSON, Date}
+import org.scalajs.dom.{XMLHttpRequest, document}
 import org.scalajs.jquery.{JQuery, jQuery}
 
+import scala.scalajs.js
+import scala.scalajs.js.Dynamic.{global => g, literal => lit, newInstance => jsnew}
+import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.{Array, Date, JSON}
+import scalacss.Defaults._
+import scalacss.ScalatagsCss._
+import scalatags.Text._
+import scalatags.Text.all._
+
 trait DataGenerator {
+
   def getWeatherReport(name: js.Dynamic) = {
     val xmlHttpRequest = new XMLHttpRequest
     xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=44db6a862fba0b067b1930da0d769e98", false)
@@ -33,83 +38,15 @@ trait DataGenerator {
   }
 }
 
-class WeatherReport extends DataGenerator {
-  def addUIElement() = {
-    jQuery("body").append(
-      """<div class="col-md-12"      style="border-bottom: 1px solid #eee; background: #3D4048">
-    <h1 style="margin-bottom: 5px; color: #DCD0C0; text-align: center;">
-        <img src="./images/image.png" height="60px" width="60px"> <span
-            style="margin-left: 20px; text-transform: uppercase; text-shadow: 2px 2px 4px #000;">Weather
-				Report -</span> <span style="text-shadow: 1px 1px 1px #000;">Get the
-				mood of your city on one click</span> <img src="./images/image.png"
-                                                           height="60px" width="60px" style="margin-left: 20px;">
-    </h1>
-</div>
-<div class="col-md-12" id="search" style="margin-top: 10%;">
-</div><div class="col-md-12 maincontainer" id="tempDetail"
-     style="margin-top: 30px; border-top: 2px solid #ccc; padding-top: 30px; border-bottom: 2px solid #ccc; padding-bottom: 30px; display: none;">
-    <div>
-        <div class="col-md-6">
-            <div style="width: 530px; height: 400px; margin-left: 60px;">
-
-                <div id="cityName"
-                     style="font-size: 28px; color: #67890a; font-weight: bold;"></div>
-
-
-                <table class="table-bordered table-striped"
-                       style="width: 540px; text-align: center; margin-top: 10px">
-                    <tr>
-                        <td style="padding: 0px; font-weight: bold; font-size: 22px;">
-                            <div
-                                    id="temp"></div>
-                        </td>
-                        <td style="padding: 0px; font-weight: bold;">
-                            <div
-                                    id="weather"></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Pressure</td>
-                        <td id="pressure"></td>
-                    </tr>
-                    <tr>
-                        <td>Humidity</td>
-                        <td id="humidity"></td>
-                    </tr>
-                    <tr>
-                        <td>Sunrise</td>
-                        <td id="sunrise"></td>
-                    </tr>
-                    <tr>
-                        <td>Sunset</td>
-                        <td id="sunset"></td>
-                    </tr>
-                    <tr>
-                        <td>Geo coords</td>
-                        <td id="geocoords"></td>
-                    </tr>
-
-                </table>
-            </div>
-        </div>
-
-        <!-- Placeholder for the Google Map -->
-        <div class="col-md-6">
-            <div id="map_canvas" style="height: 430px; width: 512px;"></div>
-        </div>
-    </div>
-</div>""")
-    jQuery("#search").append(
-      """<input name="name" id="name" size="15" type="text"
-			placeholder="Enter a city"
-			style="width: 60%; height: 35px; margin: 0% 0px 0px 16%; border-radius: 0px; box-shadow: none; padding-left: 5px" value="Delhi"/>""")
-    jQuery(
-      """<button type="button" name="submit" id="submit" class="btn btn-info"
-			style="height: 35px; margin: -1px 0px 0px 0%; border-radius: 0px;">Search</button>""")
-      .click(showDetail _)
-      .appendTo(jQuery("#search"))
+@JSExport
+object Weather extends DataGenerator {
+  @JSExport
+  def main(): Unit = {
+    val renderHtml = new WeatherReport(scalatags.Text)
+    dom.document.getElementById("content").innerHTML = renderHtml.htmlFrag.render
   }
 
+  @JSExport
   def showDetail() {
     cleanUI
 
@@ -147,13 +84,74 @@ class WeatherReport extends DataGenerator {
     jQuery("#geocoords").append("[" + result.coord.lon + ", " + result.coord.lat + "]")
     initialize(result.coord.lat.toString.toDouble, result.coord.lon.toString.toDouble)
   }
-
-
 }
 
-object Weather extends WeatherReport with js.JSApp {
+class WeatherReport[Builder, Output <: FragT, FragT]
+(val bundle: scalatags.generic.Bundle[Builder, Output, FragT]) {
 
-  def main(): Unit = {
-    jQuery(addUIElement _)
-  }
+  val htmlFrag = html(
+    ReportStyles.render[TypedTag[String]],
+    body(
+      div(
+        ReportStyles.mainDiv,
+        h1(ReportStyles.heading,
+          img(ReportStyles.firstImg, src := "./images/image.png"),
+          span(ReportStyles.firstSpan, "Weather Report - "),
+          span(ReportStyles.secondSpan, "Get the mood of your city on one click"),
+          img(ReportStyles.secondImg, src := "./images/image.png")
+        )
+      ),
+      div(
+        ReportStyles.secondDiv, id := "search",
+        input(ReportStyles.search,
+          id := "name", name := "name", placeholder := "Enter a city",
+          `type` := "text", value := "Delhi", size := 15),
+        button(ReportStyles.bootstrapButton,
+          `type` := "button", name := "submit", id := "submit",
+          onclick := "com.knoldus.weather.Weather().showDetail();", "Search")
+      ),
+      div(ReportStyles.mainContainer, id := "tempDetail",
+        div(
+          div(`class` := "col-md-6",
+            div(ReportStyles.innerDiv,
+              div(ReportStyles.city, id := "cityName"),
+              table(ReportStyles.table,
+                tr(
+                  td(ReportStyles.firstTd,
+                    div(id := "temp")
+                  ),
+                  td(ReportStyles.secondTd,
+                    div(id := "weather")
+                  )
+                ),
+                tr(
+                  td(ReportStyles.td, "Pressure"),
+                  td(id := "pressure")
+                ),
+                tr(
+                  td(ReportStyles.td, "Humidity"),
+                  td(id := "humidity")
+                ),
+                tr(
+                  td(ReportStyles.td, "Sunrise"),
+                  td(id := "sunrise")
+                ),
+                tr(
+                  td(ReportStyles.td, "Sunset"),
+                  td(id := "sunset")
+                ),
+                tr(
+                  td(ReportStyles.td, "Geo coords"),
+                  td(id := "geocoords")
+                )
+              )
+            )
+          ),
+          div(`class` := "col-md-6",
+            div(ReportStyles.mapCanvas, id := "map_canvas"))
+        )
+      )
+    )
+  )
+
 }

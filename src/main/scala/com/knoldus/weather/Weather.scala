@@ -17,7 +17,7 @@ trait DataGenerator {
 
   def getWeatherReport(name: js.Dynamic) = {
     val xmlHttpRequest = new XMLHttpRequest
-    xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=44db6a862fba0b067b1930da0d769e98", false)
+    xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=dabbe19700759dfe1d05821c3876b9c5", false)
     xmlHttpRequest.send(null);
     JSON.parse(xmlHttpRequest.responseText)
   }
@@ -38,12 +38,12 @@ trait DataGenerator {
   }
 }
 
-@JSExport
-object Weather extends DataGenerator {
+class WeatherReport extends DataGenerator{
+
   @JSExport
-  def main(): Unit = {
-    val renderHtml = new WeatherReport(scalatags.Text)
-    dom.document.getElementById("content").innerHTML = renderHtml.htmlFrag.render
+  def showReport(): Unit = {
+    val renderHtml = new WeatherFrag(scalatags.Text)
+    dom.document.body.innerHTML = renderHtml.htmlFrag.render
   }
 
   @JSExport
@@ -52,7 +52,7 @@ object Weather extends DataGenerator {
 
     val name = jQuery("#name").value()
     val result = getWeatherReport(name)
-    if (result.cod.toString() == "404") {
+    if (result.cod.toString() != "200") {
       g.alert("Please Enter A Valid City Name.")
     } else {
       populateWeatherReprt(result)
@@ -86,7 +86,15 @@ object Weather extends DataGenerator {
   }
 }
 
-class WeatherReport[Builder, Output <: FragT, FragT]
+@JSExport
+object Weather extends WeatherReport{
+  @JSExport
+  def main(): Unit = showReport
+}
+
+
+
+class WeatherFrag[Builder, Output <: FragT, FragT]
 (val bundle: scalatags.generic.Bundle[Builder, Output, FragT]) {
 
   val htmlFrag = html(

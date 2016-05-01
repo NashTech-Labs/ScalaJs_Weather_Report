@@ -1,0 +1,22 @@
+@*
+* This template is called from the `index` template. This template
+* handles the rendering of the page header and body tags. It takes
+* three arguments, a `String` for the title of the page and an `Html`
+* object to insert into the body of the page and an `Int` for refreshing the
+* page after a set interval.
+*@
+@(title: String, content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap.css")">
+    </head>
+    <body>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js"></script>
+        @content
+        @playscalajs.html.scripts("client")
+    </body>
+</html>

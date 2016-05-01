@@ -1,13 +1,14 @@
 package com.knoldus.weather
 
 import org.scalajs.dom
-import org.scalajs.dom.{XMLHttpRequest, document}
-import org.scalajs.jquery.{JQuery, jQuery}
+import org.scalajs.dom.{ XMLHttpRequest, document }
+import org.scalajs.jquery.{ JQuery, jQuery, JQueryAjaxSettings, JQueryXHR }
+import org.scalajs.dom.raw.HTMLElement
 
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.{global => g, literal => lit, newInstance => jsnew}
+import scala.scalajs.js.Dynamic.{ global => g, literal => lit, newInstance => jsnew }
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.js.{Array, Date, JSON}
+import scala.scalajs.js.{ Array, Date, JSON }
 import scalacss.Defaults._
 import scalacss.ScalatagsCss._
 import scalatags.Text._
@@ -15,18 +16,11 @@ import scalatags.Text.all._
 
 trait DataGenerator {
 
-  def getWeatherReport(name: js.Dynamic) = {
-    val xmlHttpRequest = new XMLHttpRequest
-    xmlHttpRequest.open("GET", "http://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=dabbe19700759dfe1d05821c3876b9c5", false)
-    xmlHttpRequest.send(null);
-    JSON.parse(xmlHttpRequest.responseText)
-  }
-
   def initialize(lat: Double, long: Double) = {
     val map_canvas = document.getElementById("map_canvas")
-    val map_options = lit(center = (jsnew(g.google.maps.LatLng)) (lat, long), zoom = 3, mapTypeId = g.google.maps.MapTypeId.ROADMAP)
-    val gogleMap = (jsnew(g.google.maps.Map)) (map_canvas, map_options)
-    val marker = (jsnew(g.google.maps.Marker)) (lit(map = gogleMap, position = (jsnew(g.google.maps.LatLng)(lat, long))))
+    val map_options = lit(center = (jsnew(g.google.maps.LatLng))(lat, long), zoom = 3, mapTypeId = g.google.maps.MapTypeId.ROADMAP)
+    val gogleMap = (jsnew(g.google.maps.Map))(map_canvas, map_options)
+    val marker = (jsnew(g.google.maps.Marker))(lit(map = gogleMap, position = (jsnew(g.google.maps.LatLng)(lat, long))))
   }
 
   def msToTime(unix_timestamp: Long): String = {
@@ -38,7 +32,7 @@ trait DataGenerator {
   }
 }
 
-class WeatherReport extends DataGenerator{
+class WeatherReport extends DataGenerator {
 
   @JSExport
   def showReport(): Unit = {
@@ -51,12 +45,13 @@ class WeatherReport extends DataGenerator{
     cleanUI
 
     val name = jQuery("#name").value()
-    val result = getWeatherReport(name)
-    if (result.cod.toString() != "200") {
-      g.alert("Please Enter A Valid City Name.")
-    } else {
-      populateWeatherReprt(result)
+    jQuery.ajax(js.Dynamic.literal(
+      `type` = "GET",
+      url = "/weather/" + name,
+      success = { (data: String, textStatus: String, jqXHR: JQueryXHR) =>
+      populateWeatherReprt(data)
     }
+    ).asInstanceOf[JQueryAjaxSettings])
   }
 
   private def cleanUI: JQuery = {
@@ -70,7 +65,8 @@ class WeatherReport extends DataGenerator{
     jQuery("#temp").empty()
   }
 
-  private def populateWeatherReprt(result: js.Dynamic) = {
+  private def populateWeatherReprt(data: String) = {
+    val result = JSON.parse(data)
     val weather = result.weather.asInstanceOf[Array[js.Dynamic]](0)
     jQuery("#tempDetail").attr("style", "display:block;")
     jQuery("#cityName").append(result.name + "," + result.sys.country)
@@ -87,48 +83,55 @@ class WeatherReport extends DataGenerator{
 }
 
 @JSExport
-object Weather extends WeatherReport{
+object Weather extends WeatherReport with js.JSApp {
   @JSExport
   def main(): Unit = showReport
 }
 
-
-
-class WeatherFrag[Builder, Output <: FragT, FragT]
-(val bundle: scalatags.generic.Bundle[Builder, Output, FragT]) {
+class WeatherFrag[Builder, Output <: FragT, FragT](val bundle: scalatags.generic.Bundle[Builder, Output, FragT]) {
 
   val htmlFrag = html(
     ReportStyles.render[TypedTag[String]],
     body(
       div(
         ReportStyles.mainDiv,
-        h1(ReportStyles.heading,
-          img(ReportStyles.firstImg, src := "./images/image.png"),
+        h1(
+          ReportStyles.heading,
+          img(ReportStyles.firstImg, src := "/assets/images/image.png"),
           span(ReportStyles.firstSpan, "Weather Report - "),
           span(ReportStyles.secondSpan, "Get the mood of your city on one click"),
-          img(ReportStyles.secondImg, src := "./images/image.png")
+          img(ReportStyles.secondImg, src := "/assets/images/image.png")
         )
       ),
       div(
         ReportStyles.secondDiv, id := "search",
-        input(ReportStyles.search,
+        input(
+          ReportStyles.search,
           id := "name", name := "name", placeholder := "Enter a city",
-          `type` := "text", value := "Delhi", size := 15),
-        button(ReportStyles.bootstrapButton,
+          `type` := "text", value := "Delhi", size := 15
+        ),
+        button(
+          ReportStyles.bootstrapButton,
           `type` := "button", name := "submit", id := "submit",
-          onclick := "com.knoldus.weather.Weather().showDetail();", "Search")
+          onclick := "com.knoldus.weather.Weather().showDetail();", "Search"
+        )
       ),
       div(ReportStyles.mainContainer, id := "tempDetail",
         div(
-          div(`class` := "col-md-6",
-            div(ReportStyles.innerDiv,
+          div(
+            `class` := "col-md-6",
+            div(
+              ReportStyles.innerDiv,
               div(ReportStyles.city, id := "cityName"),
-              table(ReportStyles.table,
+              table(
+                ReportStyles.table,
                 tr(
-                  td(ReportStyles.firstTd,
+                  td(
+                    ReportStyles.firstTd,
                     div(id := "temp")
                   ),
-                  td(ReportStyles.secondTd,
+                  td(
+                    ReportStyles.secondTd,
                     div(id := "weather")
                   )
                 ),
@@ -155,10 +158,11 @@ class WeatherFrag[Builder, Output <: FragT, FragT]
               )
             )
           ),
-          div(`class` := "col-md-6",
-            div(ReportStyles.mapCanvas, id := "map_canvas"))
-        )
-      )
+          div(
+            `class` := "col-md-6",
+            div(ReportStyles.mapCanvas, id := "map_canvas")
+          )
+        ))
     )
   )
 

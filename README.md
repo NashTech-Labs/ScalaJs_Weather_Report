@@ -10,6 +10,7 @@ Weather Information System- Get the mood of your city on one click  This is simp
 ###Getting Started with Code  : 
 
 ## Run the application
+Prerequisite : Java 8 and Later version 
 
 ```shell
 $ sbt  run

@@ -21,7 +21,8 @@ lazy val server = (project in file("server")).settings(
      scalacOptions ++= Seq("-deprecation", "-Xlint","-feature"),
     libraryDependencies ++= Seq(
         "com.vmunier" %%% "play-scalajs-scripts" % "0.3.0",
-        "org.scalaj" % "scalaj-http_2.11" % "2.3.0"
+        "org.scalaj" % "scalaj-http_2.11" % "2.3.0",
+         specs2 % Test
     )
 ).enablePlugins(PlayScala).
   aggregate(clients.map(projectToRef): _*).

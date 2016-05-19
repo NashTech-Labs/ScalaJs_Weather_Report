@@ -33,3 +33,5 @@ addSbtPlugin("de.johoop" % "cpd4sbt" % "1.1.5")
 resolvers += Resolver.sonatypeRepo("releases")
 
 addSbtPlugin("org.brianmckenna" % "sbt-wartremover" % "0.14")
+
+addSbtPlugin("com.orrsella" % "sbt-stats" % "1.0.5")
